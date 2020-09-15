@@ -30,7 +30,7 @@ Requires [AutoHotKey](https://www.autohotkey.com) installation with wanted compr
 
 Also, requires **Ahk2Exe.exe** folder to be in PATH environment varialble (default: *C:\Program Files\AutoHotkey\Compiler*).
 
-Run [convert/convert.cmd](convert/convert.cmd), this converts .ahk file with and without compression into corresponding subfolders:
+Run [convert/convert.cmd](convert/convert.cmd), this converts **Spotify HotKeys.ahk** to **SpotifyHotKeys.exe** with and without compression into corresponding subfolders:
 
 - no-compression
 - mpress
