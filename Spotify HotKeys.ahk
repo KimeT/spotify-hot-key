@@ -75,6 +75,7 @@ IfWinExist ahk_exe Spotify.exe
 		;WinMinimize
 		WinHide
 		WinClose
+		WinActivate, ahk_class Shell_TrayWnd ; This seems to do the trick, investigate if others (WinHide / WinClose) are unnecessary and if activating Spotify window needs modifications
 	}
 	else
 	{
@@ -82,11 +83,38 @@ IfWinExist ahk_exe Spotify.exe
 		;Sleep, 1
 		IfWinNotActive ahk_exe Spotify.exe
 		{
-			run Spotify.exe
+/* 			run Spotify.exe
 			;WinWait, Spotify, , 3
 			WinWaitActive, Spotify, , 3
-			;WinShow
+			if ErrorLevel
+			{
+				MsgBox, , Error, WinWait timed out: Spotify, 3
+				return
+			}
+			else
+			{
+				MsgBox, , Info, WinWait succeeded: Spotify, 3
+				WinActivate
+			}
+			;;WinShow
 			WinActivate
+			WinRestore
+ */
+			run Spotify.exe
+			WinWaitActive, Spotify, , 3
+			WinActivate
+
+			/* WinGet, winInfo, List, ahk_exe Spotify.exe
+			indexer := 3
+			ind := 3
+			thisID := winInfo%indexer%
+			spotifyID := winInfo%ind%
+			;MsgBox, , Info, Spotify HWND:`n%winInfo%`n%spotifyID%`n%thisID%, 3
+			WinShow, ahk_id %spotifyID%
+			WinActivate, ahk_id %spotifyID%
+			;WinShow, ahk_id %thisID%
+			;WinActivate, ahk_id %thisID%
+			 */
 		}
 	}
 }
@@ -105,6 +133,11 @@ DetectHiddenWindows, Off
 ^!c::
 {
 	CopyNowPlayingToClipBoard()
+	return
+}
+^!x::
+{
+	MsgBox, , TODO, Close Spotify, 3
 	return
 }
 return
