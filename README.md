@@ -35,3 +35,12 @@ Run [convert/convert.cmd](convert/convert.cmd), this converts **Spotify HotKeys.
 - no-compression
 - mpress
 - upx
+
+## TODO
+
+Add missing documentation:
+- **Ctrl+Alt+N**: Show Now playing
+- **Ctrl+Alt+C**: Copy (and show) Now playing to clipboard
+- **Ctrl+Alt+X**: Close Spotify
+
+Add VS Code build (F6 / Ctrl+Shift+B) instructions for development/testing purposes.
