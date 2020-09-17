@@ -133,8 +133,8 @@ Hotkeys
 				run Spotify.exe
 				WinWaitActive, Spotify, , 3
 				;WinWaitActive, ahk_exe Spotify.exe, , 3
-				WinGet, MinMaxState, MinMax
-				OutputDebug, SpotifyHotKeys: Spotify window MinMaxState = %MinMaxState%
+				;WinGet, MinMaxState, MinMax
+				;OutputDebug, SpotifyHotKeys: Spotify window MinMaxState = %MinMaxState%
 				WinSet, Top
 				WinSet, Redraw
 				WinActivate
