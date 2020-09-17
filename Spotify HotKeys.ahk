@@ -147,4 +147,3 @@ Hotkeys
 	MsgBox, , TODO, Close Spotify, 3
 	return
 }
-
