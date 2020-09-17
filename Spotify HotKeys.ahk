@@ -6,7 +6,6 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 #WinActivateForce
 OutputDebug, SpotifyHotKeys: Started
-FileAppend SpotifyHotKeys: Started,* ;* goes to stdout
 OnExit("ExitFunc")
 Menu, Tray, Tip, Spotify HotKeys:`nAlt+Up: Open/Maximize/Minimize Spotify`nAlt+Down: Play/Pause`nAlt+Left: Previous`nAlt+Right: Next
 
@@ -16,7 +15,10 @@ Startup testing for Debug
 
 DetectHiddenWindows, On
 If WinExist("ahk_exe Spotify.exe")
-	OutputDebug, SpotifyHotKeys: Spotify is already running
+	If WinActive("ahk_exe Spotify.exe")
+		OutputDebug, SpotifyHotKeys: Spotify is already running & active
+	else
+		OutputDebug, SpotifyHotKeys: Spotify is already running but not active
 else
 	OutputDebug, SpotifyHotKeys: Spotify is not yet running
 DetectHiddenWindows, Off
@@ -25,18 +27,19 @@ DetectHiddenWindows, Off
 Functions
 */
 
-ExitFunc(ExitReason, ExitCode)
-{
+ExitFunc(ExitReason, ExitCode) {
 	OutputDebug, SpotifyHotKeys: Stopped
 	return
 }
 
 HideSplashText() {
+	OutputDebug, SpotifyHotKeys: HideSplashText called
 	SplashTextOff
 	return
 }
 
 ShowSplashText(title, text, delay) {
+	OutputDebug, SpotifyHotKeys: ShowSplashText called
 	WinGetPos, X, Y, Width, Height, A
 	SplashTextOn, Width / 3, 160, %title%, `n%text%
 	SetTimer, HideSplashText, %delay%
@@ -44,26 +47,43 @@ ShowSplashText(title, text, delay) {
 }
 
 ShowNowPlaying(playing) {
-	ShowSplashText("Spotify - Now playing", playing, 2000)
+	OutputDebug, SpotifyHotKeys: ShowNowPlaying called
+	ShowSplashText("Spotify - Now playing", playing, -2000)
 	return
 }
 
 CopyNowPlayingToClipBoard(showSplash) {
+	OutputDebug, SpotifyHotKeys: CopyNowPlayingToClipBoard called
 	clipboard := GetNowPlaying()
 	if showSplash
-	{
-		ShowSplashText("Copied to clipboard: Spotify - Now playing", clipboard, 2000)
-	}
+		ShowSplashText("Copied to clipboard: Spotify - Now playing", clipboard, -2000)
 	return
 }
 
 GetNowPlaying() {
-	; TODO: Handle Spotify not open / not playing situations!
+	OutputDebug, SpotifyHotKeys: GetNowPlaying called
 	DetectHiddenWindows, On
-	WinGet, winInfo, List, ahk_exe Spotify.exe
-	indexer := 3
-	thisID := winInfo%indexer%
-	WinGetTitle, nowPlaying, ahk_id %thisID%
+	if WinExist("ahk_exe Spotify.exe")
+	{
+		WinGet, winInfo, List, ahk_exe Spotify.exe
+		indexer := 3
+		thisID := winInfo%indexer%
+		WinGetTitle, nowPlaying, ahk_id %thisID%
+
+		StartsWithSpotify := InStr(nowPlaying, "Spotify", CaseSensitive := True) = 1
+		OutputDebug, SpotifyHotKeys: StartsWithSpotify = %StartsWithSpotify%
+		NotContainsLine := Not InStr(nowPlaying, "-")
+		OutputDebug, SpotifyHotKeys: NotContainsLine = %NotContainsLine%
+
+		if StartsWithSpotify And NotContainsLine
+		{
+			nowPlaying = Spotify not playing
+		}
+	}
+	else
+	{
+		nowPlaying = Spotify not running
+	}
 	DetectHiddenWindows, Off
 	return %nowPlaying%
 }
@@ -80,25 +100,23 @@ Hotkeys
 	DetectHiddenWindows, On
 	IfWinExist ahk_exe Spotify.exe
 	{
-		OutputDebug, Spotify is already running
 		IfWinActive ahk_exe Spotify.exe
 		{
-			OutputDebug, Spotify is running & active
-			;WinMinimize
+			OutputDebug, SpotifyHotKeys: Spotify is running & active...
 			WinHide
 			WinClose
 			WinActivate, ahk_class Shell_TrayWnd ; This seems to do the trick, investigate if others (WinHide / WinClose) are unnecessary and if activating Spotify window needs modifications
-			OutputDebug, Spotify Window set: Hidden
+			OutputDebug, SpotifyHotKeys: Spotify window set Hidden
 		}
 		else
 		{
-			OutputDebug, Spotify is running but not active
+			OutputDebug, SpotifyHotKeys: Spotify is running but not active...
 			IfWinNotActive ahk_exe Spotify.exe
 			{
 	/* 			run Spotify.exe
 				;WinWait, Spotify, , 3
 				WinWaitActive, Spotify, , 3
-				if ErrorLevel
+				if %ErrorLevel%
 				{
 					MsgBox, , Error, WinWait timed out: Spotify, 3
 					return
@@ -114,6 +132,11 @@ Hotkeys
 	*/
 				run Spotify.exe
 				WinWaitActive, Spotify, , 3
+				;WinWaitActive, ahk_exe Spotify.exe, , 3
+				WinGet, MinMaxState, MinMax
+				OutputDebug, SpotifyHotKeys: Spotify window MinMaxState = %MinMaxState%
+				WinSet, Top
+				WinSet, Redraw
 				WinActivate
 
 				/* WinGet, winInfo, List, ahk_exe Spotify.exe
@@ -127,15 +150,16 @@ Hotkeys
 				;WinShow, ahk_id %thisID%
 				;WinActivate, ahk_id %thisID%
 				*/
+				OutputDebug, SpotifyHotKeys: Spotify window set Active
 			}
 		}
 	}
 	else
 	{
-		OutputDebug, Spotify is currently not running
+		OutputDebug, SpotifyHotKeys: Spotify is not running...
 		;Spotify installation path MUST be in PATH environment variable or otherwise known
 		run Spotify.exe
-		OutputDebug, Spotify opened
+		OutputDebug, SpotifyHotKeys: Spotify opened
 	}
 	DetectHiddenWindows, Off
 	return
@@ -144,6 +168,35 @@ Hotkeys
 ^!c::CopyNowPlayingToClipBoard(True)
 ^!x::
 {
-	MsgBox, , TODO, Close Spotify, 3
+	DetectHiddenWindows, On
+	if WinExist("ahk_exe Spotify.exe")
+	{
+		OutputDebug, SpotifyHotKeys: Spotify is currently running...
+		LoopCount = 100
+		LoopWait = 100
+		LoopTimeout := Round(LoopCount * LoopWait / 1000)
+
+		Process, Close, Spotify.exe
+		Loop %LoopCount%
+		{
+			Process, Exist, Spotify.exe
+			if %ErrorLevel%
+			{
+				OutputDebug, SpotifyHotKeys: Spotify still running, close loop #%A_Index%...
+			}
+			else
+			{
+				OutputDebug, SpotifyHotKeys: Spotify closed
+				return
+			}
+			Sleep %LoopWait%
+		}
+		OutputDebug, SpotifyHotKeys: Spotify could not be closed in %LoopTimeout% seconds
+	}
+	else
+	{
+		OutputDebug, SpotifyHotKeys: Spotify is currently not running, no need to close
+	}
+	DetectHiddenWindows, Off
 	return
 }
