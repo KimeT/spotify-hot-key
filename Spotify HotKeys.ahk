@@ -10,6 +10,12 @@ OnExit("ExitFunc")
 Menu, Tray, Tip, Spotify HotKeys:`nAlt+Up: Open/Maximize/Minimize Spotify`nAlt+Down: Play/Pause`nAlt+Left: Previous`nAlt+Right: Next
 
 /*
+Includes
+*/
+
+#Include %A_ScriptDir%\functions.ahk
+
+/*
 Startup testing for Debug
 */
 
@@ -164,6 +170,7 @@ Hotkeys
 	DetectHiddenWindows, Off
 	return
 }
+^!i::RM()
 ^!n::ShowNowPlaying(GetNowPlaying())
 ^!c::CopyNowPlayingToClipBoard(True)
 ^!x::
