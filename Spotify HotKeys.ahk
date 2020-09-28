@@ -14,8 +14,8 @@ Startup testing for Debug
 */
 
 DetectHiddenWindows, On
-If WinExist("ahk_exe Spotify.exe")
-	If WinActive("ahk_exe Spotify.exe")
+if WinExist("ahk_exe Spotify.exe")
+	if WinActive("ahk_exe Spotify.exe")
 		OutputDebug, SpotifyHotKeys: Spotify is already running & active
 	else
 		OutputDebug, SpotifyHotKeys: Spotify is already running but not active
@@ -98,9 +98,9 @@ Hotkeys
 !Up::
 {
 	DetectHiddenWindows, On
-	IfWinExist ahk_exe Spotify.exe
+	if WinExist("ahk_exe Spotify.exe")
 	{
-		IfWinActive ahk_exe Spotify.exe
+		if WinActive("ahk_exe Spotify.exe")
 		{
 			OutputDebug, SpotifyHotKeys: Spotify is running & active...
 			WinHide
@@ -111,7 +111,7 @@ Hotkeys
 		else
 		{
 			OutputDebug, SpotifyHotKeys: Spotify is running but not active...
-			IfWinNotActive ahk_exe Spotify.exe
+			if not WinActive("ahk_exe Spotify.exe")
 			{
 	/* 			run Spotify.exe
 				;WinWait, Spotify, , 3
